@@ -1,0 +1,7 @@
+[package]
+name = "rustman_encoding"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ordered-map = "0.4.2"
