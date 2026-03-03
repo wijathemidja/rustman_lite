@@ -30,12 +30,18 @@ fn main() {
     let mut huffman_list:Vec<Vec<String>> = sorted_frequency.clone();
     while huffman_list.len() > 1 {
         let huffman_len = huffman_list.len();
-        let key1 = huffman_list[huffman_len -1][0].trim();
-        let key2 = huffman_list[huffman_len-2][0].trim();
+        let mut key1 = huffman_list[huffman_len -1][0].trim();
+        let mut key2 = huffman_list[huffman_len-2][0].trim();
         let value1 = huffman_list[huffman_len-1][1].trim().parse::<i32>().unwrap();
         let value2 = huffman_list[huffman_len-2][1].trim().parse::<i32>().unwrap();
         let weight = value1 + value2;
         let weight = weight.to_string();
+        if key1 == ""{
+            key1 = " ";
+        }
+        if key2 == ""{
+            key2 = " ";
+        }
         let key = String::from(format!("({}{})", key1, key2));
         let key_weight_list = vec![key, weight];
         huffman_list[huffman_len-2] = key_weight_list;
