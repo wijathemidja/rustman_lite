@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 use std::{io, vec};
+use std::ptr::null;
+
 fn main() {
     let mut input:String = String::new();
     // Reads user input
@@ -78,12 +80,22 @@ fn main() {
         huffman_list.remove(huffman_len - 1);
         huffman_list = order_by_value_list(huffman_list);
     }
+    let mut binary_codes:HashMap<char, u128> = HashMap::new();
     for (key, value) in char_binary_codes{
-        let mut string_number = String::new();
-        for number in value{
-            string_number.push(number);
+        let key_as_char = key.parse::<char>().unwrap();
+        let mut value_as_string = String::new();
+        let mut value_as_binary:String = "0b";
+        for char in value {
+            value_as_string.push(char);
         }
-        println!("{} has code {}",key, string_number);
+        for number in value_as_string.chars(){
+            value_as_binary.push(number);
+        }
+        let value_as_binary:u128 = value_as_binary.parse::<u128>().unwrap();
+        binary_codes.insert(key_as_char, value_as_binary);
+    }
+    for (key, value) in binary_codes{
+        println!("{} {}", key, value);
     }
 }
 
