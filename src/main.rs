@@ -21,12 +21,14 @@ fn main() {
             }
         }
     }
-    let mut letter_frequency_map = HashMap::new();
+    let mut letter_frequency_list:Vec<Vec<String>> = Vec::new();
     for (key,value) in &letter_frequency {
         let key = key.to_string();
-        letter_frequency_map.insert(key,*value);
+        let value = value.to_string();
+        let key_value_vec = vec![key, value];
+        letter_frequency_list.push(key_value_vec);
     }
-    let sorted_frequency = order_by_value(&letter_frequency_map);
+    let sorted_frequency = order_by_value_list(letter_frequency_list);
     let mut huffman_list:Vec<Vec<String>> = sorted_frequency.clone();
     while huffman_list.len() > 1 {
         let huffman_len = huffman_list.len();
@@ -48,7 +50,6 @@ fn main() {
         huffman_list.remove(huffman_len - 1);
         huffman_list = order_by_value_list(huffman_list);
     }
-    println!("{} with total weight {}", huffman_list[0][0], huffman_list[0][1]);
 }
 
 fn single_char(og_string:&String) -> Vec<char>{
@@ -70,21 +71,6 @@ fn single_char(og_string:&String) -> Vec<char>{
     }
     list_clone
 
-}
-
-fn order_by_value(frequency_map:&HashMap<String, i32>) -> Vec<Vec<String>>{
-    let mut list_freq:Vec<Vec<String>> = Vec::new();
-    let mut index = 0;
-    for (key, value) in frequency_map{
-        let key_string = key.to_string();
-        let value_string = value.to_string();
-        let kvi_list = vec![key_string, value_string];
-        list_freq.insert(index, kvi_list);
-        index += 1;
-    }
-    list_freq.sort_by(|a,b|a[1].trim().parse::<i32>().unwrap().cmp(&b[1].trim().parse::<i32>().unwrap()));
-    list_freq.reverse();
-    list_freq
 }
 
 fn order_by_value_list(list:Vec<Vec<String>>) -> Vec<Vec<String>>{
