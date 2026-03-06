@@ -188,7 +188,15 @@ fn decode (){
     println!("Please enter your encoded message in base {}", base.trim());
     io::stdin().read_line(&mut encoded).expect("Failed to read line");
     if base.trim() == "10"{
-        encoded = String::from(format!("{:b}", encoded.trim().parse::<i128>().unwrap()));
+        let mut zero_string = String::from("");
+        for char in encoded.chars(){
+            if char == '0'{
+                zero_string.push(char);
+            } else {
+                break;
+            }
+        }
+        encoded = String::from(format!("{}{:b}",zero_string, encoded.trim().parse::<i128>().unwrap()));
 
     }
     let encoded = encoded.trim();
@@ -198,7 +206,11 @@ fn decode (){
         current_string.push(char);
         let current_int = current_string.parse::<u128>().unwrap();
         if binary_codes.contains_key(&current_int) {
-            message.push(binary_codes[&current_int]);
+            let mut letter = binary_codes[&current_int];
+            if letter == '\u{2423}'{
+                letter = ' ';
+            }
+            message.push(letter);
             current_string = String::new();
         }
     }
