@@ -97,22 +97,9 @@ fn encode() {
         huffman_list.remove(huffman_len - 1);
         huffman_list = order_by_value_list(huffman_list);
     }
-    let mut binary_codes: HashMap<char, u128> = HashMap::new();
     for (key, value) in &char_binary_codes {
-        let key_as_char = key.parse::<char>().unwrap();
-        let mut value_as_string = String::new();
-        let mut value_as_binary: String = String::from("");
-        for char in value {
-            value_as_string.push(*char);
-        }
-        for number in value_as_string.chars() {
-            value_as_binary.push(number);
-        }
-        let value_as_binary: u128 = value_as_binary.parse::<u128>().unwrap();
-        binary_codes.insert(key_as_char, value_as_binary);
-    }
-    for (key, value) in &binary_codes {
-        println!("{} {}", key, value);
+        let val = value.iter().collect::<String>();
+        println!("{} {}", key, val);
     }
     let mut final_string_list = vec![];
     for char in input_string.chars() {
@@ -120,12 +107,13 @@ fn encode() {
         if char == ' '{
             char = '\u{2423}';
         }
-        let code = binary_codes[&char];
+        let code = &char_binary_codes[&char.to_string()];
         final_string_list.push(code)
     }
     let mut final_string_list_strings = vec![];
     for char in final_string_list {
-        final_string_list_strings.push(char.to_string());
+        let a = char.iter().collect::<String>();
+        final_string_list_strings.push(a);
     }
     let final_string = final_string_list_strings.join("");
     println!("{} {}", final_string, final_string.len());
@@ -165,7 +153,7 @@ fn single_char(og_string: &String) -> Vec<char> {
 
 fn decode (){
     let mut unique_chars = String::new();
-    let mut binary_codes: HashMap<u128, char> = HashMap::new();
+    let mut binary_codes: HashMap<String, char> = HashMap::new();
     println!("How many unique characters in your encoded message?");
     io::stdin().read_line(&mut unique_chars).expect("Failed to read line");
     for _i in 1..=unique_chars.trim().parse::<i128>().unwrap() {
@@ -179,7 +167,8 @@ fn decode (){
         let char = char.trim();
         println!("What's the binary code for {}?",char);
         io::stdin().read_line(&mut binary_code).expect("Failed to read line");
-        binary_codes.insert(binary_code.trim().parse::<u128>().unwrap(), char.parse::<char>().unwrap());
+        let key = binary_code.trim().to_string();
+        binary_codes.insert(key, char.parse::<char>().unwrap());
     }
     let mut base = String::new();
     let mut encoded = String::new();
@@ -204,9 +193,9 @@ fn decode (){
     let mut current_string = String::new();
     for char in encoded.chars() {
         current_string.push(char);
-        let current_int = current_string.parse::<u128>().unwrap();
-        if binary_codes.contains_key(&current_int) {
-            let mut letter = binary_codes[&current_int];
+        let current_ref = &current_string;
+        if binary_codes.contains_key(current_ref) {
+            let mut letter = binary_codes[&current_string];
             if letter == '\u{2423}'{
                 letter = ' ';
             }
