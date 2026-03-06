@@ -1,7 +1,28 @@
 use std::collections::HashMap;
 use std::{io, vec};
-fn main() {
+fn main(){
+    let mut chosen_operation = false;
+    let mut operation = String::new();
+    while chosen_operation == false {
+        println!("Would you like to encode or decode?");
+        io::stdin().read_line(&mut operation).expect("Failed to read line");
+        if &operation.trim().to_lowercase() == "encode"{
+            chosen_operation = true;
+            encode();
+        } else if &operation.trim().to_lowercase() == "decode"{
+            chosen_operation = true;
+            decode();
+        }
+    }
+
+
+}
+
+
+
+fn encode() {
     let mut input: String = String::new();
+    println!("What's the message that you would like to encode?");
     // Reads user input
     io::stdin().read_line(&mut input).expect("Failed to read line");
     // Trims input string
@@ -142,6 +163,48 @@ fn single_char(og_string: &String) -> Vec<char> {
     list_clone
 }
 
+fn decode (){
+    let mut unique_chars = String::new();
+    let mut binary_codes: HashMap<u128, char> = HashMap::new();
+    println!("How many unique characters in your encoded message?");
+    io::stdin().read_line(&mut unique_chars).expect("Failed to read line");
+    for _i in 1..=unique_chars.trim().parse::<i128>().unwrap() {
+        let mut char = String::new();
+        let mut binary_code = String::new();
+        println!("What's the character?");
+        io::stdin().read_line(&mut char).expect("Failed to read line");
+        if char.trim().chars().count() == 0 {
+            char = '\u{2423}'.to_string();
+        }
+        let char = char.trim();
+        println!("What's the binary code for {}?",char);
+        io::stdin().read_line(&mut binary_code).expect("Failed to read line");
+        binary_codes.insert(binary_code.trim().parse::<u128>().unwrap(), char.parse::<char>().unwrap());
+    }
+    let mut base = String::new();
+    let mut encoded = String::new();
+    println!("Would you like to enter your encoded message in base 2 (2) or base 10 (10)");
+    io::stdin().read_line(&mut base).expect("Failed to read line");
+    println!("Please enter your encoded message in base {}", base.trim());
+    io::stdin().read_line(&mut encoded).expect("Failed to read line");
+    if base.trim() == "10"{
+        encoded = String::from(format!("{:b}", encoded.trim().parse::<i128>().unwrap()));
+
+    }
+    let encoded = encoded.trim();
+    let mut message = String::new();
+    let mut current_string = String::new();
+    for char in encoded.chars() {
+        current_string.push(char);
+        let current_int = current_string.parse::<u128>().unwrap();
+        if binary_codes.contains_key(&current_int) {
+            message.push(binary_codes[&current_int]);
+            current_string = String::new();
+        }
+    }
+    println!("{}", message);
+
+}
 fn order_by_value_list(list: Vec<Vec<String>>) -> Vec<Vec<String>> {
     let mut list_mut = list.clone();
     list_mut.sort_by(|a, b| a[0].cmp(&b[0]));
