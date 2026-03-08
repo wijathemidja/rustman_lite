@@ -120,7 +120,16 @@ fn encode(input:String, path:String) {
     let final_string_clone = final_string.clone();
     input_to_file(final_string_clone, String::from(format!("{}msg",path)));
     input_to_file(hash_string, String::from(format!("{}hash",path)));
-    println!("{} {}", final_string, final_string.len());
+    let mut compressed_len = 0;
+    for (key, value) in &char_binary_codes{
+        let mut letter = key.parse::<char>().unwrap();
+        if letter == '\u{2423}'{
+            letter =  ' ';
+        }
+        let weight = letter_frequency[&letter] * value.len();
+        compressed_len += weight;
+    }
+    println!("{} compressed to {}. Compression went from {} bits to {} bits",input_string, final_string, input_string.len()*64*8, compressed_len);
     let mut final_string_int = vec![];
     for num in final_string.chars() {
         final_string_int.push(num.to_string().parse::<u8>().unwrap());
