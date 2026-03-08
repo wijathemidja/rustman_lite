@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::{fs, io, vec};
 use std::fs::File;
 use std::io::Write;
+use num_bigint::BigInt;
 
 fn main(){
     let mut chosen_operation = false;
@@ -121,23 +122,14 @@ fn encode() {
         final_string_list_strings.push(a);
     }
     let final_string = final_string_list_strings.join("");
-    println!("{} {}", final_string, final_string.len());
-    let final_string_b10 = i128::from_str_radix(&final_string, 2).unwrap();
-    let mut leading_zeros = 0;
-    for char in final_string.chars() {
-        if char == '0' {
-            leading_zeros = leading_zeros + 1;
-        } else {
-            break;
-        }
-    }
-    input_to_file(final_string,String::from("rustmanmsg"));
+    let final_string_clone = final_string.clone();
+    input_to_file(final_string_clone,String::from("rustmanmsg"));
     input_to_file(hash_string,String::from("rustmanhash"));
-    let mut l_z_str = String::new();
-    for _i in 1..=leading_zeros {
-        l_z_str.push('0');
+    println!("{} {}", final_string, final_string.len());
+    let mut final_string_int = vec![];
+    for num in final_string.chars() {
+        final_string_int.push(num.to_string().parse::<u8>().unwrap());
     }
-    println!("{}{}", l_z_str, final_string_b10);
 }
 
 fn single_char(og_string: &String) -> Vec<char> {
@@ -195,24 +187,13 @@ fn decode (){
     }
     let mut base = String::new();
     let mut encoded = String::new();
-    println!("Would you like to enter your encoded message in base 2 (2) or base 10 (10) or read from file (r)");
+    println!("Would you like to enter your encoded message in base 2 (2) or read from file (r)");
     io::stdin().read_line(&mut base).expect("Failed to read line");
-    if base.trim() == "2" || base.trim() == "10"{
-        println!("Please enter your encoded message in base {}", base.trim());
+    if base.trim() == "2" {
+        println!("Please enter your encoded message");
         io::stdin().read_line(&mut encoded).expect("Failed to read line");
     }
-    if base.trim() == "10"{
-        let mut zero_string = String::from("");
-        for char in encoded.chars(){
-            if char == '0'{
-                zero_string.push(char);
-            } else {
-                break;
-            }
-        }
-        encoded = String::from(format!("{}{:b}",zero_string, encoded.trim().parse::<i128>().unwrap()));
-
-    } else if base.trim() == "r"{
+     else if base.trim() == "r"{
         encoded = fs::read_to_string("rustmanmsg.txt").expect("Failed to read rustmanmsg.txt");
     }
     let encoded = encoded.trim();

@@ -4,5 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-ordered-map = "0.4.2"
-convert-base = "1.1.2"
+num-bigint = "0.4"
