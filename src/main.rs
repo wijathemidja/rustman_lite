@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::{fs, io, vec};
 use std::fs::File;
 use std::io::Write;
-use num_bigint::BigInt;
 
 fn main(){
     let mut chosen_operation = false;
