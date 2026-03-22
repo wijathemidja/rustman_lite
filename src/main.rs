@@ -118,8 +118,11 @@ fn encode(input:String, path:String) {
     }
     let final_string = final_string_list_strings.join("");
     let final_string_clone = final_string.clone();
+    let hash_string_clone = hash_string.clone();
     input_to_file(final_string_clone, String::from(format!("{}msg",path)));
     input_to_file(hash_string, String::from(format!("{}hash",path)));
+    let rmt = String::from(format!("{}\n{}",final_string, hash_string_clone));
+    input_to_file(rmt, path);
     let mut compressed_len = 0;
     for (key, value) in &char_binary_codes{
         let mut letter = key.parse::<char>().unwrap();
@@ -156,17 +159,24 @@ fn single_char(og_string: &String) -> Vec<char> {
 
 fn decode(path:String) {
     let mut binary_codes: HashMap<String, char> = HashMap::new();
-    let hash_as_string = fs::read_to_string(String::from(format!("{}hash.txt",path))).expect("Failed to read hash file");
-    for lines in hash_as_string.lines() {
-            let list_of_chars = lines.chars().collect::<Vec<char>>();
-            let letter = list_of_chars[0];
-            let mut bc = String::new();
-            for char in 2..list_of_chars.len() {
-                bc.push(list_of_chars[char]);
+    let rmt = fs::read_to_string(String::from(format!("{}.rmt",path))).expect("Failed to read rmt file");
+    let mut first_line = true;
+    let mut encoded = String::new();
+    for lines in rmt.lines() {
+            if first_line == true{
+                encoded = lines.to_string();
+                first_line = false;
+            } else {
+                let list_of_chars = lines.chars().collect::<Vec<char>>();
+                let letter = list_of_chars[0];
+                let mut bc = String::new();
+                for char in 2..list_of_chars.len() {
+                    bc.push(list_of_chars[char]);
+                }
+                binary_codes.insert(bc, letter);
             }
-            binary_codes.insert(bc, letter);
+
         }
-    let encoded = fs::read_to_string(String::from(format!("{}msg.txt",path))).expect("Failed to read msg file");
     let mut message = String::new();
     let mut current_string = String::new();
     for char in encoded.chars() {
@@ -197,6 +207,6 @@ fn order_by_value_list(list: Vec<Vec<String>>) -> Vec<Vec<String>> {
 }
 
 fn input_to_file(input: String, path: String) {
-    let mut file = File::create(String::from(format!("{}.txt", path))).unwrap();
+    let mut file = File::create(String::from(format!("{}.rmt", path))).unwrap();
     file.write_all(input.as_bytes()).unwrap();
 }
