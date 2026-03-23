@@ -12,7 +12,11 @@ fn main() {
     } else if &args[1].trim().to_lowercase() == "decode" {
         decode(args[2].to_string());
     } else if &args[1].trim().to_lowercase() == "convert" {
-        txt_to_rmt(args[2].to_string());
+        if &args[2].trim().to_lowercase() == "txt" {
+            txt_to_rmt(args[3].to_string());
+        } else if &args[2].trim().to_lowercase() == "rmt" {
+            rmt_to_txt(args[3].to_string());
+        }
     }
     else {
         println!("Unknown operation");
@@ -223,4 +227,23 @@ fn txt_to_rmt(path: String) {
     let hash_file = fs::read_to_string(String::from(format!("{}hash.txt", path))).unwrap();
     let rmt = String::from(format!("{}\n{}", msg_file, hash_file));
     input_to_file(rmt, path, true);
+}
+
+fn rmt_to_txt(path: String) {
+    let rmt = fs::read_to_string(String::from(format!("{}.rmt", &path))).unwrap();
+    let mut index = 0;
+    let mut hash_file = String::new();
+    for lines in rmt.lines() {
+        if index == 0 {
+            input_to_file(lines.to_string(), String::from(format!("{}msg",path)), false);
+            index = 1;
+        } else if index == 1 {
+            hash_file = lines.to_string();
+            index = 2;
+        } else
+         {
+            hash_file = String::from(format!("{}\n{}",hash_file, lines));
+        }
+    }
+    input_to_file(hash_file, String::from(format!("{}hash", path)), false);
 }
