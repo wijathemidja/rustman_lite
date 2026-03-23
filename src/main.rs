@@ -21,6 +21,7 @@ fn main() {
     } else {
         println!("Unknown operation");
     }
+    println!("Thanks for using Rustman.")
 }
 fn encode(input: String, path: String) {
     // Trims input string
@@ -199,6 +200,7 @@ fn decode(path: String) {
         }
     }
     println!("{}", message);
+    input_to_file(message, String::from(format!("{}rmtd", path)), false);
 }
 fn order_by_value_list(list: Vec<Vec<String>>) -> Vec<Vec<String>> {
     let mut list_mut = list.clone();
