@@ -3,9 +3,8 @@ use std::env;
 use std::fs::File;
 use std::io::Write;
 use std::{fs, vec};
-
 fn main() {
-    let args:Vec<String> = env::args().collect();
+    let args: Vec<String> = env::args().collect();
     if &args[1].trim().to_lowercase() == "encode" {
         println!("Encoding");
         encode(args[2].to_string(), args[3].to_string());
@@ -17,12 +16,11 @@ fn main() {
         } else if &args[2].trim().to_lowercase() == "rmt" {
             rmt_to_txt(args[3].to_string());
         }
-    }
-    else {
+    } else {
         println!("Unknown operation");
     }
 }
-fn encode(input:String, path:String) {
+fn encode(input: String, path: String) {
     // Trims input string
     let input_string = { input.trim() };
     // Passes input to single char function
@@ -123,18 +121,24 @@ fn encode(input:String, path:String) {
         final_string_list_strings.push(a);
     }
     let final_string = final_string_list_strings.join("");
-    let rmt = String::from(format!("{}\n{}",final_string, hash_string));
+    let rmt = String::from(format!("{}\n{}", final_string, hash_string));
     input_to_file(rmt, path, true);
     let mut compressed_len = 0;
-    for (key, value) in &char_binary_codes{
+    for (key, value) in &char_binary_codes {
         let mut letter = key.parse::<char>().unwrap();
-        if letter == '\u{2423}'{
-            letter =  ' ';
+        if letter == '\u{2423}' {
+            letter = ' ';
         }
         let weight = letter_frequency[&letter] * value.len();
         compressed_len += weight;
     }
-    println!("{} compressed to {}. Compression went from {} bits to {} bits",input_string, final_string, input_string.len()*64, compressed_len);
+    println!(
+        "{} compressed to {}. Compression went from {} bits to {} bits",
+        input_string,
+        final_string,
+        input_string.len() * 64,
+        compressed_len
+    );
     let mut final_string_int = vec![];
     for num in final_string.chars() {
         final_string_int.push(num.to_string().parse::<u8>().unwrap());
@@ -159,26 +163,26 @@ fn single_char(og_string: &String) -> Vec<char> {
     list_clone
 }
 
-fn decode(path:String) {
+fn decode(path: String) {
     let mut binary_codes: HashMap<String, char> = HashMap::new();
-    let rmt = fs::read_to_string(String::from(format!("{}.rmt",path))).expect("Failed to read rmt file");
+    let rmt =
+        fs::read_to_string(String::from(format!("{}.rmt", path))).expect("Failed to read rmt file");
     let mut first_line = true;
     let mut encoded = String::new();
     for lines in rmt.lines() {
-            if first_line == true{
-                encoded = lines.to_string();
-                first_line = false;
-            } else {
-                let list_of_chars = lines.chars().collect::<Vec<char>>();
-                let letter = list_of_chars[0];
-                let mut bc = String::new();
-                for char in 2..list_of_chars.len() {
-                    bc.push(list_of_chars[char]);
-                }
-                binary_codes.insert(bc, letter);
+        if first_line == true {
+            encoded = lines.to_string();
+            first_line = false;
+        } else {
+            let list_of_chars = lines.chars().collect::<Vec<char>>();
+            let letter = list_of_chars[0];
+            let mut bc = String::new();
+            for char in 2..list_of_chars.len() {
+                bc.push(list_of_chars[char]);
             }
-
+            binary_codes.insert(bc, letter);
         }
+    }
     let mut message = String::new();
     let mut current_string = String::new();
     for char in encoded.chars() {
@@ -231,14 +235,17 @@ fn rmt_to_txt(path: String) {
     let mut hash_file = String::new();
     for lines in rmt.lines() {
         if index == 0 {
-            input_to_file(lines.to_string(), String::from(format!("{}msg",path)), false);
+            input_to_file(
+                lines.to_string(),
+                String::from(format!("{}msg", path)),
+                false,
+            );
             index = 1;
         } else if index == 1 {
             hash_file = lines.to_string();
             index = 2;
-        } else
-         {
-            hash_file = String::from(format!("{}\n{}",hash_file, lines));
+        } else {
+            hash_file = String::from(format!("{}\n{}", hash_file, lines));
         }
     }
     input_to_file(hash_file, String::from(format!("{}hash", path)), false);
