@@ -11,11 +11,13 @@ fn main() {
         encode(args[2].to_string(), args[3].to_string());
     } else if &args[1].trim().to_lowercase() == "decode" {
         decode(args[2].to_string());
-    } else {
+    } else if &args[1].trim().to_lowercase() == "convert" {
+        txt_to_rmt(args[3].to_string());
+    }
+    else {
         println!("Unknown operation");
     }
 }
-
 fn encode(input:String, path:String) {
     // Trims input string
     let input_string = { input.trim() };
@@ -119,10 +121,10 @@ fn encode(input:String, path:String) {
     let final_string = final_string_list_strings.join("");
     let final_string_clone = final_string.clone();
     let hash_string_clone = hash_string.clone();
-    input_to_file(final_string_clone, String::from(format!("{}msg",path)));
-    input_to_file(hash_string, String::from(format!("{}hash",path)));
+    input_to_file(final_string_clone, String::from(format!("{}msg",path)), false);
+    input_to_file(hash_string, String::from(format!("{}hash",path)), false);
     let rmt = String::from(format!("{}\n{}",final_string, hash_string_clone));
-    input_to_file(rmt, path);
+    input_to_file(rmt, path, true);
     let mut compressed_len = 0;
     for (key, value) in &char_binary_codes{
         let mut letter = key.parse::<char>().unwrap();
@@ -206,7 +208,19 @@ fn order_by_value_list(list: Vec<Vec<String>>) -> Vec<Vec<String>> {
     list_mut
 }
 
-fn input_to_file(input: String, path: String) {
-    let mut file = File::create(String::from(format!("{}.rmt", path))).unwrap();
+fn input_to_file(input: String, path: String, rmt: bool) {
+    if rmt == true {
+        let mut file = File::create(String::from(format!("{}.rmt", path))).unwrap();
+        file.write_all(input.as_bytes()).unwrap();
+    } else {}
+    let mut file = File::create(String::from(format!("{}.txt", path))).unwrap();
     file.write_all(input.as_bytes()).unwrap();
+
+}
+
+fn txt_to_rmt(path: String) {
+    let msg_file = fs::read_to_string(String::from(format!("{}msg.txt", path))).unwrap();
+    let hash_file = fs::read_to_string(String::from(format!("{}hash.txt", path))).unwrap();
+    let rmt = String::from(format!("{}\n{}", msg_file, hash_file));
+    input_to_file(rmt, path, true);
 }
