@@ -23,9 +23,22 @@ fn main() {
     }
     println!("Thanks for using Rustman.")
 }
-fn encode(input: String, path: String) {
+fn encode(mut input: String, path: String) {
     // Trims input string
-    let input_string = { input.trim() };
+    let mut input_chars: Vec<char> = input.trim().chars().collect();
+    input_chars.reverse();
+    let input_chars_ending = format!(
+        "{}{}{}{}",
+        input_chars[0], input_chars[1], input_chars[2], input_chars[3]
+    );
+    let input_string;
+    if input_chars_ending == "txt." {
+        input_string = read_to_string(&input).expect("Failed to read file");
+        input = input_string.trim().to_string();
+    } else {
+        input_string = input.trim().to_string();
+    }
+    println!("{}", input_string);
     // Passes input to single char function
     let single_char_string = single_char(&input);
     // Creates a frequency table
@@ -108,43 +121,42 @@ fn encode(input: String, path: String) {
         let string = String::from(format!("{} {}\n", key, val));
         hash_string.push_str(&string);
     }
-    let mut final_string_list = vec![];
-    for char in input_string.chars() {
-        let mut char = char;
-        if char == ' ' {
-            char = '\u{2423}';
+    let mut lines_final_strings = Vec::new();
+    let mut numlines = 0;
+    for lines in input_string.lines() {
+        numlines += 1;
+        let mut final_string_list = vec![];
+        for char in lines.chars() {
+            let mut char = char;
+            if char == ' ' {
+                char = '\u{2423}';
+            }
+            let code = &char_binary_codes[&char.to_string()];
+            final_string_list.push(code)
         }
-        let code = &char_binary_codes[&char.to_string()];
-        final_string_list.push(code)
+        let mut final_string_list_strings = vec![];
+        for char in final_string_list {
+            let a = char.iter().collect::<String>();
+            final_string_list_strings.push(a);
+        }
+        let final_string = final_string_list_strings.join("");
+        lines_final_strings.push(final_string);
     }
-    let mut final_string_list_strings = vec![];
-    for char in final_string_list {
-        let a = char.iter().collect::<String>();
-        final_string_list_strings.push(a);
+    let mut lines_final_strings_string = String::new();
+    let mut first_line_string = true;
+    for string in lines_final_strings {
+        if first_line_string == false {
+            lines_final_strings_string = format!("{}\n{}", lines_final_strings_string, string);
+        } else {
+            lines_final_strings_string = string;
+            first_line_string = false;
+        }
     }
-    let final_string = final_string_list_strings.join("");
-    let rmt = String::from(format!("{}\n{}", final_string, hash_string));
+    let rmt = String::from(format!(
+        "{}\n{}\n{}",
+        numlines, lines_final_strings_string, hash_string
+    ));
     input_to_file(rmt, path, true);
-    let mut compressed_len = 0;
-    for (key, value) in &char_binary_codes {
-        let mut letter = key.parse::<char>().unwrap();
-        if letter == '\u{2423}' {
-            letter = ' ';
-        }
-        let weight = letter_frequency[&letter] * value.len();
-        compressed_len += weight;
-    }
-    println!(
-        "{} compressed to {}. Compression went from {} bits to {} bits",
-        input_string,
-        final_string,
-        input_string.len() * 64,
-        compressed_len
-    );
-    let mut final_string_int = vec![];
-    for num in final_string.chars() {
-        final_string_int.push(num.to_string().parse::<u8>().unwrap());
-    }
 }
 
 fn single_char(og_string: &String) -> Vec<char> {
@@ -169,38 +181,53 @@ fn decode(path: String) {
     let mut binary_codes: HashMap<String, char> = HashMap::new();
     let rmt =
         read_to_string(String::from(format!("{}.rmt", path))).expect("Failed to read rmt file");
+    let rmt_lines: Vec<&str> = rmt.lines().collect();
+    let num_lines = rmt_lines[0].parse::<usize>().unwrap();
+    let mut encoded_list = Vec::new();
+    for index in 1..=num_lines {
+        encoded_list.push(rmt_lines[index])
+    }
+
+    for index in num_lines + 1..rmt_lines.len() {
+        let lines = rmt_lines[index];
+        let list_of_chars = lines.chars().collect::<Vec<char>>();
+        let letter = list_of_chars[0];
+        let mut bc = String::new();
+        for char in 2..list_of_chars.len() {
+            bc.push(list_of_chars[char]);
+        }
+        binary_codes.insert(bc, letter);
+    }
     let mut first_line = true;
-    let mut encoded = String::new();
-    for lines in rmt.lines() {
+    let mut overall_message = String::new();
+    for i in 0..=num_lines - 1 {
+        let mut message = String::new();
+        let mut current_string = String::new();
+        for char in encoded_list[i].chars() {
+            current_string.push(char);
+            let current_ref = &current_string;
+            if binary_codes.contains_key(current_ref) {
+                let mut letter = binary_codes[&current_string];
+                if letter == '\u{2423}' {
+                    letter = ' ';
+                }
+                message.push(letter);
+                current_string = String::new();
+            }
+        }
         if first_line == true {
-            encoded = lines.to_string();
+            overall_message = message;
             first_line = false;
         } else {
-            let list_of_chars = lines.chars().collect::<Vec<char>>();
-            let letter = list_of_chars[0];
-            let mut bc = String::new();
-            for char in 2..list_of_chars.len() {
-                bc.push(list_of_chars[char]);
-            }
-            binary_codes.insert(bc, letter);
+            overall_message = format!("{}\n{}", overall_message, message);
         }
     }
-    let mut message = String::new();
-    let mut current_string = String::new();
-    for char in encoded.chars() {
-        current_string.push(char);
-        let current_ref = &current_string;
-        if binary_codes.contains_key(current_ref) {
-            let mut letter = binary_codes[&current_string];
-            if letter == '\u{2423}' {
-                letter = ' ';
-            }
-            message.push(letter);
-            current_string = String::new();
-        }
-    }
-    println!("{}", message);
-    input_to_file(message, String::from(format!("{}rmtd", path)), false);
+    println!("{}", overall_message);
+    input_to_file(
+        overall_message,
+        String::from(format!("{}rmtd", path)),
+        false,
+    );
 }
 fn order_by_value_list(list: Vec<Vec<String>>) -> Vec<Vec<String>> {
     let mut list_mut = list.clone();
