@@ -1,6 +1,14 @@
 # rustman
 
 A huffman encoder built in rust
-Not intended for actual use - my first Rust project that's substantial (ie not a fibonacci calculator)
-Probably just use XZ or sm
-hope u enjoy.
+
+# roadmap
+ 
+v7 Add multiline support
+v8 Add text reading support
+
+v8 will be packed as Rustman 2
+
+Rustman 2 will have a 'LITE' version which does not contain the convert operation,
+as this isn't neccessary most of the time.
+
