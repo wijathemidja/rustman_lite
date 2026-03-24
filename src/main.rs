@@ -19,6 +19,8 @@ fn main() {
             rmt_to_txt(args[3].to_string());
         } else if &args[2].trim().to_lowercase() == "legacy" {
             legacy_rmt(args[3].to_string());
+        } else if &args[2].trim().to_lowercase() == "rm1" {
+            rm1(args[3].to_string());
         }
     } else {
         println!("Unknown operation");
@@ -268,6 +270,23 @@ fn legacy_rmt(path: String) {
     let rmt = read_to_string(String::from(format!("{}.rmt", path))).unwrap();
     let fixed = format!("1\n{}", rmt);
     input_to_file(fixed, String::from(format!("{}fixed", path)), true);
+}
+
+fn rm1 (path: String) {
+    let rmt = read_to_string(String::from(format!("{}.rmt", path))).unwrap();
+    let mut lines = rmt.lines().collect::<Vec<&str>>();
+    lines.remove(0);
+    let mut fixed = String::new();
+    let mut first_line = true;
+    for line in lines {
+        if first_line {
+            fixed = line.to_string();
+            first_line = false;
+        } else {
+            fixed = format!("{}\n{}", fixed, line);
+        }
+    }
+    input_to_file(fixed, String::from(format!("{}legacy", path)), true);
 }
 fn rmt_to_txt(path: String) {
     // Gets the rmt file
