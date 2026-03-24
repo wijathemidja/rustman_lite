@@ -157,6 +157,7 @@ fn encode(mut input: String, path: String) {
         numlines, lines_final_strings_string, hash_string
     ));
     input_to_file(rmt, path, true);
+    println!("Encoded message: \n {}", input_string);
 }
 
 fn single_char(og_string: &String) -> Vec<char> {
@@ -258,7 +259,7 @@ fn txt_to_rmt(path: String) {
     // Gets the hash file
     let hash_file = read_to_string(String::from(format!("{}hash.txt", path))).unwrap();
     // Stitches said Strings from files together
-    let rmt = String::from(format!("{}\n{}", msg_file, hash_file));
+    let rmt = String::from(format!("1\n{}\n{}", msg_file, hash_file));
     // Writes string to file (*.rmt)
     input_to_file(rmt, path, true);
 }
@@ -266,22 +267,28 @@ fn txt_to_rmt(path: String) {
 fn rmt_to_txt(path: String) {
     // Gets the rmt file
     let rmt = read_to_string(String::from(format!("{}.rmt", &path))).unwrap();
+    if rmt.lines().collect::<Vec<&str>>()[0].trim().parse::<i32>().unwrap() > 1{
+        println!("WARNING! THIS OPERATION WILL FAIL. YOU ARE TRYING TO CONVERT A MULTI-LINE STRING RMT. TXTs DO NOT SUPPORT RUSTMAN MULTILINE!");
+    }
     // Used for removing first line
     let mut index = 0;
     let mut hash_file = String::new();
     for lines in rmt.lines() {
         if index == 0 {
+            index = 1;
+        }
+        else if index == 1 {
             // Writes the msg file
             input_to_file(
                 lines.to_string(),
                 String::from(format!("{}msg", path)),
                 false,
             );
-            index = 1;
-        } else if index == 1 {
+            index = 2;
+        } else if index == 2 {
             // Otherwise there is an empty line at the top of the hash file
             hash_file = lines.to_string();
-            index = 2;
+            index = 3;
         } else {
             // Then adds each line as a new line to the hash txt file
             hash_file = String::from(format!("{}\n{}", hash_file, lines));
