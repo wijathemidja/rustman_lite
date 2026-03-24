@@ -14,21 +14,8 @@ fn main() {
         decode(args[2].to_string());
     }
 }
-fn encode(mut input: String, path: String) {
-    // Trims input string
-    let mut input_chars: Vec<char> = input.trim().chars().collect();
-    input_chars.reverse();
-    let input_chars_ending = format!(
-        "{}{}{}{}",
-        input_chars[0], input_chars[1], input_chars[2], input_chars[3]
-    );
-    let input_string;
-    if input_chars_ending == "txt." {
-        input_string = read_to_string(&input).expect("Failed to read file");
-        input = input_string.trim().to_string();
-    } else {
-        input_string = input.trim().to_string();
-    }
+fn encode(input: String, path: String) {
+    let input_string = read_to_string(&input).expect("Failed to read file");
     // Passes input to single char function
     let single_char_string = single_char(&input);
     // Creates a frequency table
@@ -38,7 +25,6 @@ fn encode(mut input: String, path: String) {
         // Adds each letter as a key to the frequency table
         letter_frequency.insert(char, 0);
     }
-
     for char in &single_char_string {
         for letter in input_string.chars() {
             if letter == *char {

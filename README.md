@@ -6,10 +6,6 @@ A very liteweight huffman encoder built in rust, with full encoding and decoding
 
 ## Encoding Text
 
-To encode a string use:
-
-rman encode "Example Text" ex
-
 To encode a file use:
 
 rman encode "example.txt" ex
