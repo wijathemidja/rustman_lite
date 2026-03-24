@@ -17,6 +17,8 @@ fn main() {
             txt_to_rmt(args[3].to_string());
         } else if &args[2].trim().to_lowercase() == "rmt" {
             rmt_to_txt(args[3].to_string());
+        } else if &args[2].trim().to_lowercase() == "legacy" {
+            legacy_rmt(args[3].to_string());
         }
     } else {
         println!("Unknown operation");
@@ -242,7 +244,6 @@ fn order_by_value_list(list: Vec<Vec<String>>) -> Vec<Vec<String>> {
     list_mut.reverse();
     list_mut
 }
-
 fn input_to_file(input: String, path: String, rmt: bool) {
     if rmt == true {
         let mut file = File::create(String::from(format!("{}.rmt", path))).unwrap();
@@ -263,7 +264,11 @@ fn txt_to_rmt(path: String) {
     // Writes string to file (*.rmt)
     input_to_file(rmt, path, true);
 }
-
+fn legacy_rmt(path: String) {
+    let rmt = read_to_string(String::from(format!("{}.rmt", path))).unwrap();
+    let fixed = format!("1\n{}", rmt);
+    input_to_file(fixed, String::from(format!("{}fixed", path)), true);
+}
 fn rmt_to_txt(path: String) {
     // Gets the rmt file
     let rmt = read_to_string(String::from(format!("{}.rmt", &path))).unwrap();
