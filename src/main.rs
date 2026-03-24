@@ -12,20 +12,7 @@ fn main() {
         encode(args[2].to_string(), args[3].to_string());
     } else if &args[1].trim().to_lowercase() == "decode" {
         decode(args[2].to_string());
-    } else if &args[1].trim().to_lowercase() == "convert" {
-        if &args[2].trim().to_lowercase() == "txt" {
-            txt_to_rmt(args[3].to_string());
-        } else if &args[2].trim().to_lowercase() == "rmt" {
-            rmt_to_txt(args[3].to_string());
-        } else if &args[2].trim().to_lowercase() == "legacy" {
-            legacy_rmt(args[3].to_string());
-        } else if &args[2].trim().to_lowercase() == "rm1" {
-            rm1(args[3].to_string());
-        }
-    } else {
-        println!("Unknown operation");
     }
-    println!("Thanks for using Rustman.")
 }
 fn encode(mut input: String, path: String) {
     // Trims input string
@@ -42,7 +29,6 @@ fn encode(mut input: String, path: String) {
     } else {
         input_string = input.trim().to_string();
     }
-    println!("{}", input_string);
     // Passes input to single char function
     let single_char_string = single_char(&input);
     // Creates a frequency table
@@ -161,7 +147,6 @@ fn encode(mut input: String, path: String) {
         numlines, lines_final_strings_string, hash_string
     ));
     input_to_file(rmt, path, true);
-    println!("Encoded message: \n {}", input_string);
 }
 
 fn single_char(og_string: &String) -> Vec<char> {
@@ -227,7 +212,6 @@ fn decode(path: String) {
             overall_message = format!("{}\n{}", overall_message, message);
         }
     }
-    println!("{}", overall_message);
     input_to_file(
         overall_message,
         String::from(format!("{}rmtd", path)),
@@ -256,68 +240,3 @@ fn input_to_file(input: String, path: String, rmt: bool) {
     }
 }
 
-fn txt_to_rmt(path: String) {
-    // Gets the binary message file
-    let msg_file = read_to_string(String::from(format!("{}msg.txt", path))).unwrap();
-    // Gets the hash file
-    let hash_file = read_to_string(String::from(format!("{}hash.txt", path))).unwrap();
-    // Stitches said Strings from files together
-    let rmt = String::from(format!("1\n{}\n{}", msg_file, hash_file));
-    // Writes string to file (*.rmt)
-    input_to_file(rmt, path, true);
-}
-fn legacy_rmt(path: String) {
-    let rmt = read_to_string(String::from(format!("{}.rmt", path))).unwrap();
-    let fixed = format!("1\n{}", rmt);
-    input_to_file(fixed, String::from(format!("{}fixed", path)), true);
-}
-
-fn rm1 (path: String) {
-    let rmt = read_to_string(String::from(format!("{}.rmt", path))).unwrap();
-    let mut lines = rmt.lines().collect::<Vec<&str>>();
-    lines.remove(0);
-    let mut fixed = String::new();
-    let mut first_line = true;
-    for line in lines {
-        if first_line {
-            fixed = line.to_string();
-            first_line = false;
-        } else {
-            fixed = format!("{}\n{}", fixed, line);
-        }
-    }
-    input_to_file(fixed, String::from(format!("{}legacy", path)), true);
-}
-fn rmt_to_txt(path: String) {
-    // Gets the rmt file
-    let rmt = read_to_string(String::from(format!("{}.rmt", &path))).unwrap();
-    if rmt.lines().collect::<Vec<&str>>()[0].trim().parse::<i32>().unwrap() > 1{
-        println!("WARNING! THIS OPERATION WILL FAIL. YOU ARE TRYING TO CONVERT A MULTI-LINE STRING RMT. TXTs DO NOT SUPPORT RUSTMAN MULTILINE!");
-    }
-    // Used for removing first line
-    let mut index = 0;
-    let mut hash_file = String::new();
-    for lines in rmt.lines() {
-        if index == 0 {
-            index = 1;
-        }
-        else if index == 1 {
-            // Writes the msg file
-            input_to_file(
-                lines.to_string(),
-                String::from(format!("{}msg", path)),
-                false,
-            );
-            index = 2;
-        } else if index == 2 {
-            // Otherwise there is an empty line at the top of the hash file
-            hash_file = lines.to_string();
-            index = 3;
-        } else {
-            // Then adds each line as a new line to the hash txt file
-            hash_file = String::from(format!("{}\n{}", hash_file, lines));
-        }
-    }
-    // Writes the hash string to the hash txt file
-    input_to_file(hash_file, String::from(format!("{}hash", path)), false);
-}
